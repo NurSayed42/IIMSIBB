@@ -1,51 +1,43 @@
+# admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, NewInspection, Inspection
 
-# Custom User Admin - Complete fields
+# Custom User Admin
 class CustomUserAdmin(UserAdmin):
-    list_display = ('email', 'user_name', 'employee_id', 'branch_name', 'role', 'is_staff', 'is_active', 'date_joined')
-    list_filter = ('role', 'is_staff', 'is_active', 'branch_name', 'date_joined')
-    search_fields = ('email', 'user_name', 'employee_id', 'branch_name', 'first_name', 'last_name')
-    ordering = ('-date_joined',)
+    list_display = ('email', 'user_name', 'employee_id', 'branch_name', 'role', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff', 'is_active', 'branch_name')
+    search_fields = ('email', 'user_name', 'employee_id', 'branch_name')
+    ordering = ('email',)
     
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal Info', {'fields': (
-            'user_name', 'first_name', 'last_name', 
-            'employee_id', 'branch_name'
-        )}),
-        ('Role & Permissions', {'fields': (
-            'role', 'is_active', 'is_staff', 'is_superuser', 
-            'groups', 'user_permissions'
-        )}),
-        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+        ('Personal Info', {'fields': ('user_name', 'employee_id', 'branch_name')}),
+        ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': (
-                'email', 'user_name', 'password1', 'password2', 
-                'employee_id', 'branch_name', 'role', 'is_staff', 'is_active'
-            ),
+            'fields': ('email', 'user_name', 'password1', 'password2', 'employee_id', 'branch_name', 'role', 'is_staff', 'is_active'),
         }),
     )
 
-# New Inspection Admin - Complete fields
+# New Inspection Admin
 class NewInspectionAdmin(admin.ModelAdmin):
     list_display = ('project', 'client_name', 'industry_name', 'assigned_inspector', 'branch_name', 'status', 'created_at')
     list_filter = ('status', 'branch_name', 'created_at', 'assigned_inspector')
-    search_fields = ('project', 'client_name', 'industry_name', 'phone_number', 'branch_name')
+    search_fields = ('project', 'client_name', 'industry_name', 'phone_number')
     readonly_fields = ('created_at', 'updated_at')
-    list_per_page = 20
+    list_editable = ('status',)
     
     fieldsets = (
         ('Basic Information', {
-            'fields': (
-                'project', 'client_name', 'industry_name', 'phone_number',
-                'assigned_inspector', 'branch_name', 'status'
-            )
+            'fields': ('project', 'client_name', 'industry_name', 'phone_number')
+        }),
+        ('Assignment', {
+            'fields': ('assigned_inspector', 'branch_name', 'status')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -53,28 +45,54 @@ class NewInspectionAdmin(admin.ModelAdmin):
         }),
     )
 
-# Inspection Admin - ALL FIELDS INCLUDED
+# Inspection Admin - Comprehensive
 class InspectionAdmin(admin.ModelAdmin):
-    list_display = ('client_name', 'industry_name', 'inspector', 'branch_name', 'status', 'created_at', 'get_location_summary')
+    list_display = ('client_name', 'industry_name', 'inspector', 'branch_name', 'status', 'created_at', 'get_location_summary_display')
     list_filter = ('status', 'branch_name', 'created_at', 'inspector')
-    search_fields = ('client_name', 'industry_name', 'phone_number', 'group_name', 'owner_name')
-    readonly_fields = ('created_at', 'updated_at', 'get_location_summary', 'get_first_location', 'get_last_location')
-    list_per_page = 20
+    search_fields = ('client_name', 'industry_name', 'client_name', 'phone_number')
+    readonly_fields = ('created_at', 'updated_at', 'get_location_summary_display', 'get_first_location_display', 'get_last_location_display')
+    list_editable = ('status',)
     
+    # Custom methods for display in admin
+    def get_location_summary_display(self, obj):
+        return obj.get_location_summary()
+    get_location_summary_display.short_description = 'Location Summary'
+    
+    def get_first_location_display(self, obj):
+        first_loc = obj.get_first_location()
+        if first_loc:
+            return f"Lat: {first_loc.get('latitude')}, Lng: {first_loc.get('longitude')}"
+        return "No data"
+    get_first_location_display.short_description = 'First Location'
+    
+    def get_last_location_display(self, obj):
+        last_loc = obj.get_last_location()
+        if last_loc:
+            return f"Lat: {last_loc.get('latitude')}, Lng: {last_loc.get('longitude')}"
+        return "No data"
+    get_last_location_display.short_description = 'Last Location'
+    
+    # Organized fieldsets for better UI
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('inspector', 'branch_name', 'status')
+        ('Inspector Information', {
+            'fields': ('inspector', 'branch_name')
         }),
         ('Location Tracking', {
             'fields': (
-                'location_points', 'location_start_time', 'location_end_time', 
-                'total_location_points', 'get_location_summary', 'get_first_location', 'get_last_location'
-            )
+                'location_points', 
+                'location_start_time', 
+                'location_end_time', 
+                'total_location_points',
+                'get_location_summary_display',
+                'get_first_location_display',
+                'get_last_location_display'
+            ),
+            'classes': ('collapse',)
         }),
         ('Section A: Company Client Information', {
             'fields': (
                 'client_name', 'group_name', 'industry_name', 'nature_of_business',
-                'legal_status', 'date_of_establishment', 'office_address', 
+                'legal_status', 'date_of_establishment', 'office_address',
                 'showroom_address', 'factory_address', 'phone_number',
                 'account_number', 'account_id', 'tin_number', 'date_of_opening',
                 'vat_reg_number', 'first_investment_date', 'sector_code',
@@ -84,7 +102,7 @@ class InspectionAdmin(admin.ModelAdmin):
         }),
         ('Section B: Owner Information', {
             'fields': (
-                'owner_name', 'owner_age', 'father_name', 'mother_name', 
+                'owner_name', 'owner_age', 'father_name', 'mother_name',
                 'spouse_name', 'academic_qualification', 'children_info',
                 'business_successor', 'residential_address', 'permanent_address'
             ),
@@ -102,8 +120,8 @@ class InspectionAdmin(admin.ModelAdmin):
         }),
         ('Section E: Proposed Facilities', {
             'fields': (
-                'facility_type', 'existing_limit', 'applied_limit', 'recommended_limit',
-                'bank_percentage', 'client_percentage'
+                'facility_type', 'existing_limit', 'applied_limit',
+                'recommended_limit', 'bank_percentage', 'client_percentage'
             ),
             'classes': ('collapse',)
         }),
@@ -115,30 +133,27 @@ class InspectionAdmin(admin.ModelAdmin):
         }),
         ('Section G: Business Analysis', {
             'fields': (
-                'market_situation', 'client_position', 'competitors', 'business_reputation',
-                'production_type', 'product_name', 'production_capacity', 'actual_production',
-                'profitability_observation'
+                'market_situation', 'client_position', 'competitors',
+                'business_reputation', 'production_type', 'product_name',
+                'production_capacity', 'actual_production', 'profitability_observation'
             ),
             'classes': ('collapse',)
         }),
         ('Labor Force', {
             'fields': (
                 'male_officer', 'female_officer', 'skilled_officer', 'unskilled_officer',
-                'male_worker', 'female_worker', 'skilled_worker', 'unskilled_worker'
+                'male_worker', 'female_worker', 'skilled_worker', 'unskilled_worker',
+                'key_employees'
             ),
-            'classes': ('collapse',)
-        }),
-        ('Key Employees', {
-            'fields': ('key_employees',),
             'classes': ('collapse',)
         }),
         ('Section H: Property & Assets', {
             'fields': (
                 'cash_balance', 'stock_trade_finished', 'stock_trade_financial',
                 'accounts_receivable', 'advance_deposit', 'other_current_assets',
-                'land_building', 'plant_machinery', 'other_assets', 'ibbl_investment',
-                'other_banks_investment', 'borrowing_sources', 'accounts_payable',
-                'other_current_liabilities', 'long_term_liabilities', 
+                'land_building', 'plant_machinery', 'other_assets',
+                'ibbl_investment', 'other_banks_investment', 'borrowing_sources',
+                'accounts_payable', 'other_current_liabilities', 'long_term_liabilities',
                 'other_non_current_liabilities', 'paid_up_capital', 'retained_earning',
                 'resources'
             ),
@@ -169,31 +184,12 @@ class InspectionAdmin(admin.ModelAdmin):
             'fields': ('uploaded_documents',),
             'classes': ('collapse',)
         }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('Status & Timestamps', {
+            'fields': ('status', 'created_at', 'updated_at')
         }),
     )
-    
-    def get_location_summary(self, obj):
-        return obj.get_location_summary()
-    get_location_summary.short_description = 'Location Summary'
-    
-    def get_first_location(self, obj):
-        first_loc = obj.get_first_location()
-        if first_loc:
-            return f"Lat: {first_loc['latitude']}, Lng: {first_loc['longitude']}, Time: {first_loc['timestamp']}"
-        return "No location data"
-    get_first_location.short_description = 'First Location'
-    
-    def get_last_location(self, obj):
-        last_loc = obj.get_last_location()
-        if last_loc:
-            return f"Lat: {last_loc['latitude']}, Lng: {last_loc['longitude']}, Time: {last_loc['timestamp']}"
-        return "No location data"
-    get_last_location.short_description = 'Last Location'
 
-# Register models
+# Register models with admin
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(NewInspection, NewInspectionAdmin)
 admin.site.register(Inspection, InspectionAdmin)

@@ -1,3 +1,4 @@
+
 """
 Django settings for invest_backend project.
 """
@@ -5,7 +6,6 @@ Django settings for invest_backend project.
 from pathlib import Path
 from datetime import timedelta
 import os
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
     'accounts',
@@ -63,25 +64,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'invest_backend.wsgi.application'
 
 # Database
-if os.environ.get('DATABASE_URL'):
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'invest_traker',
+        'USER': 'postgres',
+        'PASSWORD': '12345',
+        'HOST': 'db',
+        'PORT': '5432',
     }
-else:
-    # Fallback for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'invest_traker',
-            'USER': 'postgres',
-            'PASSWORD': '12345',
-            'HOST': 'db',
-            'PORT': '5432',
-        }
-    }
+}
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -89,6 +81,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
