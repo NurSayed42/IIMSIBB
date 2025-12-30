@@ -147,6 +147,9 @@ import BranchAdminUsersManagement from './components/branch_admin/BranchAdminUse
 import InspectionsListPage from './components/admin/InspectionsListPage';
 import InspectionDetailsPage from './components/admin/InspectionDetailsPage';
 import BranchInspectionsList from './components/branch_admin/BranchInspectionsList';
+
+
+import InspectionsList from './components/inspector/InspectionList';
 // Dashboard Redirect Component
 const DashboardRedirect = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -238,6 +241,10 @@ export const routes = [
   },
   {
     path: '/inspector/inspections',
-    element: <ProtectedRoute roles={['inspector']}><InspectionsListPage /></ProtectedRoute>
+    element: <ProtectedRoute roles={['inspector']}><InspectionsList /></ProtectedRoute>
+  },
+   {
+    path: '/inspector/my-inspections',
+    element: <ProtectedRoute roles={['inspector']}><InspectionsList /></ProtectedRoute>
   }
 ];
