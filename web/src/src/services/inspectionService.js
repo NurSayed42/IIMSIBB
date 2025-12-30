@@ -1703,27 +1703,113 @@ export const getAdminInspectionById = async (inspectionId) => {
     
     const inspection = response.data;
     
-    // Process media files with proper base64 and file path handling
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const processMediaField = (field, fieldName) => {
-      console.log(`🔄 Processing ${fieldName}:`, field);
-      
-      if (!field) {
-        console.log(`📭 ${fieldName} is empty`);
-        return [];
-      }
-      
-      if (Array.isArray(field)) {
-        console.log(`✅ ${fieldName} is already an array with ${field.length} items`);
-        return field.map((item, index) => {
+        console.log(`🔄 Processing ${fieldName}:`, field);
+        
+        if (!field) {
+          console.log(`📭 ${fieldName} is empty`);
+          return [];
+        }
+        
+        // ✅ FIXED: Handle both array and single object
+        let items = [];
+        
+        if (Array.isArray(field)) {
+          console.log(`✅ ${fieldName} is already an array with ${field.length} items`);
+          items = field;
+        } else if (typeof field === 'object' && field !== null) {
+          console.log(`🔄 ${fieldName} is single object, converting to array`);
+          items = [field];
+        } else {
+          console.log(`❓ ${fieldName} unknown type:`, typeof field, field);
+          return [];
+        }
+        
+        // Process each item
+        return items.map((item, index) => {
           // Handle base64 photos
           if (fieldName === 'site_photos') {
             if (item.base64_data) {
               console.log(`🖼️ ${fieldName}[${index}] has base64 data`);
               return {
                 url: item.base64_data.startsWith('data:') ? item.base64_data : `data:image/jpeg;base64,${item.base64_data}`,
-                name: item.file_name || `Photo ${index + 1}`,
+                name: item.file_name || item.name || `Photo ${index + 1}`,
                 type: 'photo',
                 file_size: item.file_size,
+                ...item
+              };
+            }
+          }
+          
+          // Handle video files - FIXED
+          if (fieldName === 'site_video') {
+            console.log(`🎥 Processing video ${index}:`, item);
+            
+            // Case 1: Direct video file path
+            if (item.file_path) {
+              console.log(`🎥 ${fieldName}[${index}] has file path:`, item.file_path);
+              return {
+                url: item.file_path,
+                name: item.file_name || item.name || `Video ${index + 1}`,
+                type: 'video',
+                file_size: item.file_size,
+                ...item
+              };
+            }
+            
+            // Case 2: Base64 video data
+            if (item.base64_data) {
+              console.log(`🎥 ${fieldName}[${index}] has base64 data`);
+              const videoUrl = item.base64_data.startsWith('data:video') ? 
+                item.base64_data : 
+                `data:video/mp4;base64,${item.base64_data}`;
+              return {
+                url: videoUrl,
+                name: item.file_name || item.name || `Video ${index + 1}`,
+                type: 'video',
+                file_size: item.file_size,
+                ...item
+              };
+            }
+            
+            // Case 3: Direct URL
+            if (item.url) {
+              console.log(`🎥 ${fieldName}[${index}] has URL:`, item.url);
+              return {
+                url: item.url,
+                name: item.file_name || item.name || `Video ${index + 1}`,
+                type: 'video',
+                file_size: item.file_size,
+                ...item
+              };
+            }
+            
+            // Case 4: String that might be a path
+            if (typeof item === 'string' && (item.includes('.mp4') || item.includes('.avi') || item.includes('.mov'))) {
+              console.log(`🎥 ${fieldName}[${index}] appears to be a video file path:`, item);
+              return {
+                url: item,
+                name: `Video ${index + 1}`,
+                type: 'video',
                 ...item
               };
             }
@@ -1735,24 +1821,19 @@ export const getAdminInspectionById = async (inspectionId) => {
               console.log(`📄 ${fieldName}[${index}] has file path:`, item.file_path);
               return {
                 url: item.file_path,
-                name: item.file_name || `Document ${index + 1}`,
+                name: item.file_name || item.name || `Document ${index + 1}`,
                 type: 'document',
                 file_size: item.file_size,
                 ...item
               };
             }
-          }
-          
-          // Handle video files
-          if (fieldName === 'site_video') {
-            if (item.file_path || item.base64_data) {
-              console.log(`🎥 ${fieldName}[${index}] has video data`);
-              const videoUrl = item.file_path || 
-                (item.base64_data?.startsWith('data:') ? item.base64_data : `data:video/mp4;base64,${item.base64_data}`);
+            
+            if (item.base64_data) {
+              console.log(`📄 ${fieldName}[${index}] has base64 data`);
               return {
-                url: videoUrl,
-                name: item.file_name || `Video ${index + 1}`,
-                type: 'video',
+                url: item.base64_data.startsWith('data:') ? item.base64_data : `data:application/pdf;base64,${item.base64_data}`,
+                name: item.file_name || item.name || `Document ${index + 1}`,
+                type: 'document',
                 file_size: item.file_size,
                 ...item
               };
@@ -1787,11 +1868,17 @@ export const getAdminInspectionById = async (inspectionId) => {
             };
           }
         });
-      } else {
-        console.log(`⚠️ ${fieldName} is not an array:`, typeof field, field);
-        return [];
-      }
-    };
+      } 
+
+
+
+
+
+
+
+
+
+
 
     // Process each media field
     inspection.site_photos = processMediaField(inspection.site_photos, 'site_photos');

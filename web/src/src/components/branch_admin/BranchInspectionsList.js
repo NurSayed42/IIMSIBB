@@ -1,9 +1,9 @@
 // src/components/branch_admin/BranchInspectionsList.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  getBranchAdminInspectionsByStatus, 
-  updateBranchAdminInspectionStatus 
+import {
+  getBranchAdminInspectionsByStatus,
+  updateBranchAdminInspectionStatus
 } from '../../services/inspectionService';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -35,11 +35,11 @@ const BranchInspectionsList = () => {
       console.log('🎯 [BRANCH VIEW] Fetching inspections for branch:', user?.branch_name);
 
       const data = await getBranchAdminInspectionsByStatus(status);
-      
+     
       console.log('📥 [BRANCH VIEW] Received inspections:', data.length);
-      
+     
       setAllInspections(data);
-      
+     
       if (data.length > 0) {
         showSuccess(`Loaded ${data.length} inspections from ${user?.branch_name}`);
       } else {
@@ -78,18 +78,18 @@ const BranchInspectionsList = () => {
       console.log('🔄 [STATUS UPDATE] Updating inspection:', inspectionId, 'to:', newStatus);
 
       await updateBranchAdminInspectionStatus(inspectionId, newStatus);
-      
+     
       // Update local state
-      setAllInspections(prev => 
-        prev.map(inspection => 
-          inspection.id === inspectionId 
+      setAllInspections(prev =>
+        prev.map(inspection =>
+          inspection.id === inspectionId
             ? { ...inspection, status: newStatus }
             : inspection
         )
       );
 
       showSuccess(`Status updated to ${newStatus.replace('_', ' ')}`);
-      
+     
     } catch (error) {
       console.error('❌ [STATUS UPDATE] Error:', error);
       showError(error.message || 'Failed to update status');
@@ -129,7 +129,7 @@ const BranchInspectionsList = () => {
   const getAvailableStatusOptions = (currentStatus) => {
     const allStatuses = [
       { value: 'pending', label: 'Pending', color: 'gray' },
-      { value: 'in_progress', label: 'In Progress', color: 'yellow' },
+      { value: 'in_progress', label: 'In_progress', color: 'yellow' },
       { value: 'completed', label: 'Completed', color: 'blue' },
       { value: 'approved', label: 'Approved', color: 'green' },
       { value: 'rejected', label: 'Rejected', color: 'red' }
@@ -179,21 +179,20 @@ const BranchInspectionsList = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        
+       
         <div className="flex gap-2">
-          <select 
+          <select
             value={status}
             onChange={(e) => navigate(`/branch-admin/inspections?status=${e.target.value}`)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
           </select>
-          
+         
           <button
             onClick={fetchInspections}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -210,7 +209,7 @@ const BranchInspectionsList = () => {
             <div className="text-gray-400 text-6xl mb-4">📋</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No inspections found</h3>
             <p className="text-gray-500 mb-4">
-              {allInspections.length === 0 
+              {allInspections.length === 0
                 ? `No inspections available for branch "${user?.branch_name}"`
                 : 'No inspections match your search criteria'
               }
@@ -232,19 +231,19 @@ const BranchInspectionsList = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 
+                        <h3
                           className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
                           onClick={() => handleInspectionClick(inspection.id)}
                         >
                           {inspection.client_name || 'Unnamed Client'}
                         </h3>
-                        
+                       
                         <div className="flex items-center gap-2">
                           {/* Status Badge */}
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(inspection.status)}`}>
                             {formatStatus(inspection.status)}
                           </span>
-                          
+                         
                           {/* Status Dropdown */}
                           <div className="relative">
                             <select
@@ -260,7 +259,7 @@ const BranchInspectionsList = () => {
                                 </option>
                               ))}
                             </select>
-                            
+                           
                             {updatingStatus === inspection.id && (
                               <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -269,7 +268,7 @@ const BranchInspectionsList = () => {
                           </div>
                         </div>
                       </div>
-                      
+                     
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
                         <div className="flex items-center">
                           <span className="font-medium mr-2">Industry:</span>
@@ -288,7 +287,7 @@ const BranchInspectionsList = () => {
                           <span>{inspection.phone_number || 'N/A'}</span>
                         </div>
                       </div>
-                      
+                     
                       <div className="flex items-center text-xs text-gray-500">
                         <span className="flex items-center">
                           <span className="font-medium">Branch:</span>
@@ -298,7 +297,7 @@ const BranchInspectionsList = () => {
                         <span className="flex items-center">
                           <span className="font-medium">Created:</span>
                           <span className="ml-1">
-                            {inspection.created_at 
+                            {inspection.created_at
                               ? new Date(inspection.created_at).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
@@ -325,15 +324,14 @@ const BranchInspectionsList = () => {
                         )}
                       </div>
                     </div>
-                    
-                    <div 
+                   
+                    <div
                       className="ml-4 flex-shrink-0 cursor-pointer"
                       onClick={() => handleInspectionClick(inspection.id)}
                     >
-                      <svg className="h-5 w-5 text-gray-400 hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <button className='bg-green-600 py-2 px-3 rounded-md text-white mt-2'>View Details</button>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+                                        </div>
                   </div>
                 </div>
               </li>

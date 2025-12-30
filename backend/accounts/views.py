@@ -5001,7 +5001,7 @@ def convert_to_full_inspection(request, inspection_id):
         # 🔥 IMPORTANT: Set required fields
         inspection_data['inspector'] = new_inspection.assigned_inspector.id if new_inspection.assigned_inspector else request.user.id
         inspection_data['branch_name'] = new_inspection.branch_name
-        inspection_data['status'] = 'completed'  # Set status to completed
+        inspection_data['status'] = 'Completed'  # Set status to completed
         
         # Copy essential fields from NewInspection
         if not inspection_data.get('client_name'):
