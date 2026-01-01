@@ -193,3 +193,9 @@ const InspectionsList = () => {
 };
 
 export default InspectionsList;
+
+
+
+
+
+

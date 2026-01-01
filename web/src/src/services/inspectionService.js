@@ -1632,9 +1632,6 @@ export const getMyAssignedInspections = async (status = null) => {
 
 
 
-
-
-
 // Default export with all functions
 export default {
   // User & Auth

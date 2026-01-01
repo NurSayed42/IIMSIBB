@@ -1549,7 +1549,7 @@ const handleSubmit = async (e) => {
         </div>
 
         {/* Location Tracking Section */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
+        {/* <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Location Tracking (Required)</h2>
           <div className="space-y-4">
             <div className={`p-4 rounded-lg border ${
@@ -1646,7 +1646,17 @@ const handleSubmit = async (e) => {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
+
+
+
+
+
+
+
+
+
+
 
         {/* Section Navigation */}
         <div className="bg-white shadow rounded-lg mb-6">
